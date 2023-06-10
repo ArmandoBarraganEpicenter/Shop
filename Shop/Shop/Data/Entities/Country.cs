@@ -11,5 +11,6 @@ namespace Shop.Data.Entities
         [MaxLength(50, ErrorMessage ="El campo {0} debe tener máximo {1} carácteres.")]
         public string Name { get; set; }
 
+ 
     }
 }

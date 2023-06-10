@@ -9,20 +9,25 @@ namespace Shop.Controllers
     {
         private readonly DataContext _context;
 
-        public CategoriesController(DataContext context)
+        public CategoriesController(DataContext controller)
         {
-            _context = context;
+            _context = controller;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Categories.ToListAsync());
+
         }
 
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -30,11 +35,12 @@ namespace Shop.Controllers
         {
             if (ModelState.IsValid)
             {
+                _context.Add(category);
                 try
                 {
-                    _context.Add(category);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
+
                 }
                 catch (DbUpdateException dbUpdateException)
                 {
@@ -63,13 +69,15 @@ namespace Shop.Controllers
                 return NotFound();
             }
 
-            var country = await _context.Categories.FindAsync(id);
-            if (country == null)
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null)
             {
                 return NotFound();
             }
-            return View(country);
+
+            return View(category);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -88,12 +96,11 @@ namespace Shop.Controllers
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
-
                 catch (DbUpdateException dbUpdateException)
                 {
                     if (dbUpdateException.InnerException.Message.Contains("duplicate"))
                     {
-                        ModelState.AddModelError(string.Empty, "Ya existe una categoría con el mismo nombre.");
+                        ModelState.AddModelError(string.Empty, "Ya existe un país con el mismo nombre.");
                     }
                     else
                     {
@@ -109,6 +116,8 @@ namespace Shop.Controllers
             return View(category);
         }
 
+
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Categories == null)
@@ -116,15 +125,16 @@ namespace Shop.Controllers
                 return NotFound();
             }
 
-            Category category = await _context.Categories.FindAsync(id);
-                
-            if (category== null)
+            var category = await _context.Categories
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (category == null)
             {
                 return NotFound();
             }
 
             return View(category);
         }
+
 
         public async Task<IActionResult> Delete(int? id)
         {
@@ -151,8 +161,7 @@ namespace Shop.Controllers
             {
                 return Problem("Entity set 'DataContext.Categories'  is null.");
             }
-            var category = await _context.Categories
-               .FirstOrDefaultAsync(m => m.Id == id);
+            var category = await _context.Categories.FindAsync(id);
             if (category != null)
             {
                 _context.Categories.Remove(category);
@@ -162,12 +171,6 @@ namespace Shop.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CountryExists(int id)
-        {
-            return (_context.Countries?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
-
-
-
     }
+
 }

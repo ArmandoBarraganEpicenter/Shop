@@ -19,12 +19,16 @@ namespace Shop.Controllers
             _context = context;
         }
 
-        // GET: Countries
+
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Countries.ToListAsync());
+              return _context.Countries != null ? 
+                          View(await _context.Countries.ToListAsync()) :
+                          Problem("Entity set 'DataContext.Countries'  is null.");
         }
 
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Countries == null)
@@ -43,6 +47,7 @@ namespace Shop.Controllers
         }
 
 
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
@@ -54,11 +59,12 @@ namespace Shop.Controllers
         {
             if (ModelState.IsValid)
             {
+                _context.Add(country);
                 try
                 {
-                    _context.Add(country);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
+
                 }
                 catch (DbUpdateException dbUpdateException)
                 {
@@ -79,6 +85,8 @@ namespace Shop.Controllers
             return View(country);
         }
 
+
+        // GET: Countries/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Countries == null)
@@ -94,9 +102,10 @@ namespace Shop.Controllers
             return View(country);
         }
 
+  
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Country country)
+        public async Task<IActionResult> Edit(int id,  Country country)
         {
             if (id != country.Id)
             {
@@ -111,19 +120,6 @@ namespace Shop.Controllers
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
-
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CountryExists(country.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
                 catch (DbUpdateException dbUpdateException)
                 {
                     if (dbUpdateException.InnerException.Message.Contains("duplicate"))
@@ -174,14 +170,10 @@ namespace Shop.Controllers
             {
                 _context.Countries.Remove(country);
             }
-
+            
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CountryExists(int id)
-        {
-            return (_context.Countries?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
     }
 }

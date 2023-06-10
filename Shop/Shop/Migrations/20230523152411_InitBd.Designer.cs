@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shop.Data;
 
@@ -10,9 +11,11 @@ using Shop.Data;
 namespace Shop.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230523152411_InitBd")]
+    partial class InitBd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,9 +38,6 @@ namespace Shop.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("Categories");
                 });
@@ -123,12 +123,17 @@ namespace Shop.Migrations
             modelBuilder.Entity("Shop.Data.Entities.State", b =>
                 {
                     b.HasOne("Shop.Data.Entities.Country", "Country")
-                        .WithMany()
+                        .WithMany("States")
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Country");
+                });
+
+            modelBuilder.Entity("Shop.Data.Entities.Country", b =>
+                {
+                    b.Navigation("States");
                 });
 
             modelBuilder.Entity("Shop.Data.Entities.State", b =>
